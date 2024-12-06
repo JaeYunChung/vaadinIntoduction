@@ -14,6 +14,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.dom.Style;
 import com.vaadin.flow.router.Route;
 
 import java.util.ArrayList;
@@ -36,40 +37,41 @@ public class GridApp extends Div {
 
     private void setInfoForm()
     {
-        TextField name = new TextField("Name");
+        TextField name = new TextField();
         //TextField age = new TextField("Age");
         Select<Integer> age = new Select<>();
-        TextField email = new TextField("Email");
-        TextField school = new TextField("School");
-
+        //TextField email = new TextField();
+        TextField school = new TextField();
         final List<Integer> AGES = IntStream.range(0, 100).boxed().collect(Collectors.toList());
-        age.setItems(AGES); age.setLabel("Age");
+        age.setItems(AGES);
+        EmailField emailField = new EmailField();
+
         FormLayout formLayout = new FormLayout();
-        formLayout.add(name, age, email, school);
+        formLayout.addFormItem(name, "Name");
+        formLayout.addFormItem(age, "Age");
+        formLayout.addFormItem(emailField, "Email").getElement().setAttribute("colspan", "2");
+        formLayout.addFormItem(school, "School");
+        formLayout.setWidth("80%");
+        //formLayout.getStyle().setAlignItems(Style.AlignItems.CENTER);
         formLayout.setResponsiveSteps(
                 // Use one column by default
                 new ResponsiveStep("0", 1),
                 // Use two columns, if layout's width exceeds 500px
                 new ResponsiveStep("500px", 2));
-        formLayout.setColspan(email, 2);
         Button button = new Button("click");
         button.addClickListener(e -> {
             Optional<Person> person = DataService.savePerson(new Person(name.getValue(), Integer.parseInt(age.getValue().toString()),
-                    email.getValue(), school.getValue()));
+                    emailField.generateModelValue(), school.getValue()));
             if(person.isPresent()){
                 people.add(person.get());
                 this.refreshGrid();
             }
-            name.clear();age.clear();email.clear();school.clear();
+            name.clear();age.clear();emailField.clear();school.clear();
         });button.addClickShortcut(Key.ENTER);
         VerticalLayout layout = new VerticalLayout(formLayout, button);
-        layout.setPadding(true);
-        layout.setWidth("80%");
-        layout.getStyle().set("margin", "auto");
-        layout.getStyle().set("display", "flex");
-        layout.getStyle().set("justify-content", "center");
-        layout.getStyle().set("align-items", "center");
-
+        //layout.setPadding(true);
+        formLayout.getStyle().set("margin-left", "15%");
+        layout.setAlignItems(FlexComponent.Alignment.CENTER);
         add(layout);
     }
     private void setGridComponent()
